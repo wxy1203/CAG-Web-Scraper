@@ -60,8 +60,15 @@ def scrape_jewel_attractions(url: str) -> str:
                     split_text = text.split(' (')  # Split by ' (' to separate area and level
                     area = split_text[0]
                     level = split_text[1].rstrip(')') if len(split_text) > 1 else ''
-                    outlet_info['Area'] = area
-                    outlet_info['Level'] = level
+                    if len(level) == 2:
+                        level = 'Level ' + level[1]
+                    outlet_info['Area'] = "Public"
+                    if level:
+                        outlet_info['Level'] = level + ", " + area
+                    else:
+                        if len(area) == 2:
+                            area = 'Level ' + area[1]
+                        outlet_info['Level'] = area
                 else:
                     outlet_info[key_mapping[class_]] = text
             else:
@@ -112,9 +119,9 @@ def main():
                 for outlet in result['outlets']:
 
                     opening_hour = outlet['Opening Hour']
-                    if opening_hour == '24/7':
-                        opening_hour = "'24/7" # Avoid Excel interpreting '24/7' as a date
-
+                    if opening_hour == '24/7' or opening_hour == '24 Hours' or opening_hour == 'Daily,24 hours' or opening_hour == '24 hours':
+                        opening_hour = '24 hours daily'
+                        
                     new_row = create_new_row(row['Domain'], row['Facility/Service/Attraction'], outlet['Terminal'],
                                                 outlet['Area'], outlet['Level'], opening_hour, result['Description'])
                     results.append(new_row)
@@ -122,8 +129,10 @@ def main():
                 new_row = create_new_row(row['Domain'], row['Facility/Service/Attraction'], '',
                                             '', '', '', result['Description'])
                 results.append(new_row)
+        # print(result['Description'])
+
     results_df = pd.concat(results, ignore_index=True)
-    results_df.to_csv('output.csv', index=False, encoding='utf-8-sig')
+    results_df.to_csv('output.csv', index=False, encoding='utf-8')
 
 if __name__ == '__main__':
     main()
