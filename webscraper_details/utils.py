@@ -19,6 +19,7 @@ def get_default_result():
         'Level': "",
         'Opening Hour': "",
         'outlets': [],
+        'Description': ""
     }
 
 def create_new_row(domain, facility, terminal, area, level, opening_hour, description):
